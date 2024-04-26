@@ -1,0 +1,9 @@
+services:
+  ubuntu:
+    build:
+      context: .
+      target: final
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined

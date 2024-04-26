@@ -8,3 +8,4 @@ services:
       - SYS_ADMIN
     security_opt:
       - seccomp:unconfined
+    command: ["bash", "-c", "while :; do sleep 3600; done"]

@@ -77,8 +77,6 @@ jobs:
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
             type=sha
             type=sha,prefix={{branch}}-
-            # type=semver,prefix=v,enable=${{ github.ref == format('refs/tags/{0}', 'v*.*.*') }}
-            # type=semver,prefix=v,metadata=short,enable=${{ github.ref == format('refs/tags/{0}', 'v*.*.*') }}
           labels: |
             org.opencontainers.image.title=${{ env.IMAGE_NAME }}
 

@@ -16,5 +16,5 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     unminimize && \
     apt update && \
     apt install -y $(grep -v '^# ' /tmp/package.list)
-RUN cp /tmp/docker-clean /etc/apt/apt.conf.d/docker-clean && \
+RUN mv /tmp/docker-clean /etc/apt/apt.conf.d/docker-clean && \
     rm /etc/apt/apt.conf.d/keep-cache

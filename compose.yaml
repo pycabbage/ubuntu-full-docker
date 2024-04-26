@@ -1,5 +1,6 @@
 services:
   ubuntu:
+    image: ghcr.io/pycabbage/ubuntu-full-docker:latest
     build:
       context: .
       target: final

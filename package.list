@@ -194,7 +194,7 @@ libnl-3-200
 libnl-genl-3-200
 libnpth0
 libnsl2
-# libnss-systemd
+libnss-systemd
 libntfs-3g89
 libnuma1
 libp11-kit0
@@ -203,7 +203,7 @@ libpam-cap
 libpam-modules
 libpam-modules-bin
 libpam-runtime
-# libpam-systemd
+libpam-systemd
 libpam0g
 libparted2
 libpcap0.8
@@ -243,7 +243,7 @@ libssh-4
 libssl3
 libstdc++6
 libstemmer0d
-# libsystemd0
+libsystemd0
 libtasn1-6
 libtext-charwidth-perl
 libtext-iconv-perl
@@ -352,7 +352,7 @@ python3-pyparsing
 python3-secretstorage
 python3-six
 python3-software-properties
-# python3-systemd
+python3-systemd
 python3-update-manager
 python3-wadllib
 python3-yaml
@@ -373,10 +373,10 @@ software-properties-common
 squashfs-tools
 strace
 sudo
-# systemd
-# systemd-hwe-hwdb
-# systemd-sysv
-# systemd-timesyncd
+systemd
+systemd-hwe-hwdb
+systemd-sysv
+systemd-timesyncd
 sysvinit-utils
 tar
 tcpdump

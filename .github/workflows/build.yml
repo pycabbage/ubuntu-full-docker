@@ -86,7 +86,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          outputs: if (github.event_name != 'pull_request') { return 'type=local,dest=image.tgz' }
+          outputs: ${{ github.event_name == 'pull_request' && 'type=local,dest=image.tgz' || 'type=registry' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha

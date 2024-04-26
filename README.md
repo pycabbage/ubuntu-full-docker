@@ -6,7 +6,9 @@
 ## Feature
 
 - nonroot user: `ubuntu` (included in nopasswd `sudo` group)
-- Installed package: inatalled in Ubuntu Ser
+- Installed package: inatalled in Ubuntu Server
+- Language: `ja_JP.UTF-8`
+- Docker outside of Docker
 
 ```bash
 docker compose up -d

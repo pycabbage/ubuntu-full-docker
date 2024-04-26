@@ -1,6 +1,7 @@
 services:
   ubuntu:
     image: ghcr.io/pycabbage/ubuntu-full-docker:latest
+    pull_policy: always
     build:
       context: .
       target: final

@@ -5,8 +5,8 @@
 
 ## Feature
 
-- nonroot user: `ubuntu`
-- Installed package: inatalled in Ubuntu Server 22.04
+- nonroot user: `ubuntu` (included in nopasswd `sudo` group)
+- Installed package: inatalled in Ubuntu Ser
 
 ```bash
 docker compose up -d

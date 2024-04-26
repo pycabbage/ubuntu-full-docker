@@ -22,7 +22,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 RUN mv /tmp/docker-clean /etc/apt/apt.conf.d/docker-clean && \
     rm /etc/apt/apt.conf.d/keep-cache
 
-RUN adduser --disabled-password -s /bin/bash --gecos '' ${NONROOT_USER} && \
+RUN adduser --disabled-password --shell /bin/bash --gecos '' ${NONROOT_USER} && \
     usermod -aG sudo ${NONROOT_USER} && \
     echo "${NONROOT_USER} ALL=NOPASSWD: ALL" > /etc/sudoers.d/90-${NONROOT_USER} && \
     chmod 0440 /etc/sudoers.d/90-${NONROOT_USER} && \
@@ -30,3 +30,4 @@ RUN adduser --disabled-password -s /bin/bash --gecos '' ${NONROOT_USER} && \
 
 USER ${NONROOT_USER}
 WORKDIR /home/${NONROOT_USER}
+ENV TERM=xterm-256color

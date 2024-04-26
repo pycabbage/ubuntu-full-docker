@@ -3,6 +3,7 @@
 FROM ubuntu:22.04 as base
 
 FROM base as final
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN sed -i -E 's/(apt-get upgrade)$/DEBIAN_FRONTEND=noninteractive \1 -y/g' $(which unminimize) && \
     sed -i -E 's/^(read)/REPLY=Y # \1/g' $(which unminimize)

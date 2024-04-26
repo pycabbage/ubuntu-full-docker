@@ -50,7 +50,7 @@ RUN adduser --disabled-password --shell /bin/bash --gecos '' ${NONROOT_USER} && 
 # Create and add docker group with gid
 RUN groupadd -g 999 docker && \
     usermod -aG docker ${NONROOT_USER} && \
-    usermod -aG docker ${NONROOT_USER} root
+    usermod -aG docker root
 
 USER ${NONROOT_USER}
 WORKDIR /home/${NONROOT_USER}

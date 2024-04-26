@@ -37,7 +37,9 @@ RUN sed -i -r 's!(deb|deb-src) \S+!\1 mirror://mirrors.ubuntu.com/mirrors.txt!' 
 
 # Change language to ja_JP.UTF-8
 RUN localedef -i ja_JP -c -f UTF-8 -A /usr/share/locale/locale.alias ja_JP.UTF-8 && \
-    update-locale LANG=ja_JP.UTF-8
+    update-locale LANG=ja_JP.UTF-8 && \
+    ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
+    dpkg-reconfigure --frontend noninteractive tzdata
 ENV LANG ja_JP.UTF-8
 
 RUN adduser --disabled-password --shell /bin/bash --gecos '' ${NONROOT_USER} && \
@@ -45,6 +47,9 @@ RUN adduser --disabled-password --shell /bin/bash --gecos '' ${NONROOT_USER} && 
     echo "${NONROOT_USER} ALL=NOPASSWD: ALL" > /etc/sudoers.d/90-${NONROOT_USER} && \
     chmod 0440 /etc/sudoers.d/90-${NONROOT_USER} && \
     visudo -c
+# Create and add docker group with gid
+RUN groupadd -g 999 docker && \
+    usermod -aG docker ${NONROOT_USER}
 
 USER ${NONROOT_USER}
 WORKDIR /home/${NONROOT_USER}

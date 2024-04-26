@@ -13,3 +13,5 @@ services:
     command: ["bash", "-c", "while :; do sleep 3600; done"]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    group_add:
+      - "docker"

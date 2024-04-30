@@ -3,6 +3,7 @@
 ARG NONROOT_USER=ubuntu
 ARG VARIANT=24.04
 ARG PYTHON_VERSION=3.12.3
+
 FROM ubuntu:${VARIANT} as base
 
 FROM base as builder
@@ -60,6 +61,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     libffi-dev liblzma-dev ccache
 
 USER "${NONROOT_USER}"
+# scripts/install-python-pyenv.sh
 RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/install-python-pyenv.sh \
     . /tmp/install-python-pyenv.sh prepare
 RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/install-python-pyenv.sh \

@@ -4,6 +4,13 @@
 TASK=${1:-"prepare"}
 PYTHON_VERSION=${2:-3.12.3}
 
+if [ -d $PYENV_ROOT/bin ]; then
+  PYENV_ROOT="$HOME/.pyenv"
+  [[ -d $PYENV_ROOT/bin ]] && PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init -)"
+  eval "$(pyenv virtualenv-init -)"
+fi
+
 if [ $TASK = "prepare" ]; then
   # Install pyenv
   curl https://pyenv.run | bash
@@ -37,6 +44,3 @@ else
   echo "Invalid task: $TASK"
   exit 1
 fi
-
-
-

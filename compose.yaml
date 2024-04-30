@@ -1,6 +1,6 @@
 services:
   ubuntu:
-    image: ghcr.io/pycabbage/ubuntu-full-docker:latest
+    image: ghcr.io/pycabbage/ubuntu-full-docker:24.04
     pull_policy: always
     build:
       context: .

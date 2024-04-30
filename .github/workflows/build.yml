@@ -10,6 +10,10 @@ on:
   #   - cron: '37 8 * * *'
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - "*.md"
+      - "LICENSE"
+      - "compose.yaml"
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
@@ -108,7 +112,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: image.tgz
+          name: ubuntu-${{ matrix.variant }}-image
           path: image.tgz
 
       # Sign the resulting Docker image digest except on PRs.

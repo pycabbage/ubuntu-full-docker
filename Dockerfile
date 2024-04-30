@@ -10,18 +10,17 @@ ARG VARIANT
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Add non-root user before unminimize to avoid uid/gid conflict
+# Create and add docker group with gid
+RUN groupadd -g 999 docker
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt update && \
     apt-get install -y sudo adduser
 RUN ( grep "${NONROOT_USER}" /etc/passwd || useradd -m -s /bin/bash -u 1000 "${NONROOT_USER}" ) && \
-    usermod -aG sudo "${NONROOT_USER}" && \
+    usermod -aG docker,root,sudo "${NONROOT_USER}" && \
     echo "${NONROOT_USER} ALL=NOPASSWD: ALL" > "/etc/sudoers.d/90-${NONROOT_USER}" && \
     chmod 0440 "/etc/sudoers.d/90-${NONROOT_USER}" && \
     visudo -c
-# Create and add docker group with gid
-RUN (grep -E "999|docker" /etc/group) || groupadd -g 999 docker && \
-    usermod -aG docker,root "${NONROOT_USER}"
 
 RUN sed -i -E 's/(apt-get upgrade)$/DEBIAN_FRONTEND=noninteractive \1 -y/g' $(which unminimize) && \
     sed -i -E 's/^(read)/REPLY=Y # \1/g' $(which unminimize)
@@ -72,6 +71,9 @@ RUN localedef -i ja_JP -c -f UTF-8 -A /usr/share/locale/locale.alias ja_JP.UTF-8
     ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
     dpkg-reconfigure --frontend noninteractive tzdata
 ENV LANG ja_JP.UTF-8
+
+# Build time log
+RUN echo "Build time: $(date --rfc-3339=seconds -u) UTC" > /var/log/build-time.log
 
 USER "${NONROOT_USER}"
 WORKDIR "/home/${NONROOT_USER}"

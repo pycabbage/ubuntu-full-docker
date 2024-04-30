@@ -44,26 +44,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     $(. /etc/os-release && echo "$VERSION_CODENAME") stable" > /etc/apt/sources.list.d/docker.list && \
     apt update && \
     apt-get install -y docker-ce-cli docker-compose-plugin
-RUN mv /tmp/docker-clean /etc/apt/apt.conf.d/docker-clean && \
-    rm /etc/apt/apt.conf.d/keep-cache
-
-# Change apt mirror
-RUN \
-    if [ "${VARIANT}" = "24.04" ]; then \
-        sed -i -r 's!(URIs:) \S+!\1 mirror://mirrors.ubuntu.com/mirrors.txt!' /etc/apt/sources.list.d/ubuntu.sources; \
-    else \
-        sed -i -r 's!(deb|deb-src) \S+!\1 mirror://mirrors.ubuntu.com/mirrors.txt!' /etc/apt/sources.list; \
-    fi
-
-# Change language to ja_JP.UTF-8
-RUN localedef -i ja_JP -c -f UTF-8 -A /usr/share/locale/locale.alias ja_JP.UTF-8 && \
-    update-locale LANG=ja_JP.UTF-8 && \
-    ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
-    dpkg-reconfigure --frontend noninteractive tzdata
-ENV LANG ja_JP.UTF-8
-
-# Build time log
-RUN echo "Build time: $(date --rfc-3339=seconds -u) UTC" > /var/log/build-time.log
 
 FROM builder as pyenv_builder
 
@@ -111,5 +91,23 @@ COPY --from=rust \
     --chown="${NONROOT_USER}":"${NONROOT_USER}" \
     "/home/${NONROOT_USER}/.rustup" "/home/${NONROOT_USER}/.rustup"
 
+# revert apt cache settings
+RUN mv /tmp/docker-clean /etc/apt/apt.conf.d/docker-clean && \
+    rm /etc/apt/apt.conf.d/keep-cache
+# Change apt mirror
+RUN \
+    if [ "${VARIANT}" = "24.04" ]; then \
+    sed -i -r 's!(URIs:) \S+!\1 mirror://mirrors.ubuntu.com/mirrors.txt!' /etc/apt/sources.list.d/ubuntu.sources; \
+    else \
+    sed -i -r 's!(deb|deb-src) \S+!\1 mirror://mirrors.ubuntu.com/mirrors.txt!' /etc/apt/sources.list; \
+    fi
+# Change language to ja_JP.UTF-8
+RUN localedef -i ja_JP -c -f UTF-8 -A /usr/share/locale/locale.alias ja_JP.UTF-8 && \
+    update-locale LANG=ja_JP.UTF-8 && \
+    ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
+    dpkg-reconfigure --frontend noninteractive tzdata
+# Build time log
+RUN echo "Build time: $(date --rfc-3339=seconds -u) UTC" > /var/log/build-time.log
+ENV LANG ja_JP.UTF-8
 WORKDIR "/home/${NONROOT_USER}"
 ENV TERM=xterm-256color

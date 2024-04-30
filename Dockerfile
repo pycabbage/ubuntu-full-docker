@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1
 
 ARG NONROOT_USER=ubuntu
-
-FROM ubuntu:22.04 as base
+ARG VARIANT=22.04
+FROM ubuntu:${VARIANT} as base
 
 FROM base as final
-ARG NONROOT_USER
+ARG NONROOT_USER, VARIANT
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN sed -i -E 's/(apt-get upgrade)$/DEBIAN_FRONTEND=noninteractive \1 -y/g' $(which unminimize) && \
@@ -15,7 +15,7 @@ RUN mv /etc/apt/apt.conf.d/docker-clean /tmp/docker-clean && \
     echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    --mount=type=bind,source=./package.list,target=/tmp/package.list \
+    --mount=type=bind,source=./packages/ubuntu-${VARIANT}.list,target=/tmp/package.list \
     unminimize && \
     apt update && \
     apt-get install -y $(grep -v '^# ' /tmp/package.list) \
@@ -33,7 +33,12 @@ RUN mv /tmp/docker-clean /etc/apt/apt.conf.d/docker-clean && \
     rm /etc/apt/apt.conf.d/keep-cache
 
 # Change apt mirror
-RUN sed -i -r 's!(deb|deb-src) \S+!\1 mirror://mirrors.ubuntu.com/mirrors.txt!' /etc/apt/sources.list
+RUN \
+    if [ "${VARIANT}" = "24.04" ]; then \
+        sed -i -r 's!(URIs:) \S+!\1 mirror://mirrors.ubuntu.com/mirrors.txt!' /etc/apt/sources.list.d/ubuntu.sources; \
+    else \
+        sed -i -r 's!(deb|deb-src) \S+!\1 mirror://mirrors.ubuntu.com/mirrors.txt!' /etc/apt/sources.list; \
+    fi
 
 RUN adduser --disabled-password --shell /bin/bash --gecos '' ${NONROOT_USER} && \
     usermod -aG sudo ${NONROOT_USER} && \
@@ -42,8 +47,7 @@ RUN adduser --disabled-password --shell /bin/bash --gecos '' ${NONROOT_USER} && 
     visudo -c
 # Create and add docker group with gid
 RUN (grep docker /etc/group) || groupadd -g 999 docker && \
-    usermod -aG docker ${NONROOT_USER} && \
-    usermod -aG docker root
+    usermod -aG docker,root ${NONROOT_USER}
 
 # Change language to ja_JP.UTF-8
 RUN localedef -i ja_JP -c -f UTF-8 -A /usr/share/locale/locale.alias ja_JP.UTF-8 && \

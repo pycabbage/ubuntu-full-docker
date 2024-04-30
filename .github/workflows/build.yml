@@ -81,9 +81,10 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
-            type=sha
-            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') && matrix.variant == '24.04' }}
+            type=raw,value=${{ matrix.variant }},enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+            type=sha,prefix=${{ matrix.variant }}-
+            type=ref,event=branch,prefix=${{ matrix.variant }}-
           labels: |
             org.opencontainers.image.title=${{ env.IMAGE_NAME }}
 

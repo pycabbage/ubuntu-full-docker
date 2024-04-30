@@ -10,6 +10,10 @@ ARG VARIANT
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Add non-root user before unminimize to avoid uid/gid conflict
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && \
+    apt-get install -y sudo adduser
 RUN ( grep "${NONROOT_USER}" /etc/passwd || useradd -m -s /bin/bash -u 1000 "${NONROOT_USER}" ) && \
     usermod -aG sudo "${NONROOT_USER}" && \
     echo "${NONROOT_USER} ALL=NOPASSWD: ALL" > "/etc/sudoers.d/90-${NONROOT_USER}" && \

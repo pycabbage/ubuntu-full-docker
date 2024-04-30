@@ -5,7 +5,8 @@ ARG VARIANT=22.04
 FROM ubuntu:${VARIANT} as base
 
 FROM base as final
-ARG NONROOT_USER, VARIANT
+ARG NONROOT_USER
+ARG VARIANT
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN sed -i -E 's/(apt-get upgrade)$/DEBIAN_FRONTEND=noninteractive \1 -y/g' $(which unminimize) && \

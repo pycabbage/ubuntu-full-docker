@@ -47,7 +47,7 @@ RUN ( grep "${NONROOT_USER}" /etc/passwd || useradd -m -s /bin/bash -u 1000 "${N
     chmod 0440 "/etc/sudoers.d/90-${NONROOT_USER}" && \
     visudo -c
 # Create and add docker group with gid
-RUN if [ "${VARIANT}" = "24.04" ]; then \
+RUN if [ ! "${VARIANT}" = "24.04" ]; then \
     (grep docker /etc/group) || groupadd -g 999 docker && \
     usermod -aG docker,root "${NONROOT_USER}"; \
     fi

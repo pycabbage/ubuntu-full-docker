@@ -36,6 +36,13 @@ jobs:
       # with sigstore/fulcio when running outside of PRs.
       id-token: write
 
+    strategy:
+      matrix:
+        variant:
+        - 22.04
+        - 24.04
+      fail-fast: false
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -93,6 +100,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            VARIANT=${{ matrix.variant }}
 
       - name: Upload image artifact
         if: github.event_name == 'pull_request'

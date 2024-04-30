@@ -41,7 +41,7 @@ RUN \
         sed -i -r 's!(deb|deb-src) \S+!\1 mirror://mirrors.ubuntu.com/mirrors.txt!' /etc/apt/sources.list; \
     fi
 
-RUN ( grep "${NONROOT_USER}" /etc/passwd || useradd -m -s /bin/bash --gecos '' -u 1000 "${NONROOT_USER}" ) && \
+RUN ( grep "${NONROOT_USER}" /etc/passwd || useradd -m -s /bin/bash -u 1000 "${NONROOT_USER}" ) && \
     usermod -aG sudo "${NONROOT_USER}" && \
     echo "${NONROOT_USER} ALL=NOPASSWD: ALL" > "/etc/sudoers.d/90-${NONROOT_USER}" && \
     chmod 0440 "/etc/sudoers.d/90-${NONROOT_USER}" && \

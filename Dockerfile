@@ -41,14 +41,14 @@ RUN \
         sed -i -r 's!(deb|deb-src) \S+!\1 mirror://mirrors.ubuntu.com/mirrors.txt!' /etc/apt/sources.list; \
     fi
 
-RUN adduser --disabled-password --shell /bin/bash --gecos '' ${NONROOT_USER} && \
-    usermod -aG sudo ${NONROOT_USER} && \
-    echo "${NONROOT_USER} ALL=NOPASSWD: ALL" > /etc/sudoers.d/90-${NONROOT_USER} && \
-    chmod 0440 /etc/sudoers.d/90-${NONROOT_USER} && \
+RUN ( grep "${NONROOT_USER}" /etc/passwd || useradd -m -s /bin/bash "${NONROOT_USER}" ) && \
+    usermod -aG sudo "${NONROOT_USER}" && \
+    echo "${NONROOT_USER} ALL=NOPASSWD: ALL" > "/etc/sudoers.d/90-${NONROOT_USER}" && \
+    chmod 0440 "/etc/sudoers.d/90-${NONROOT_USER}" && \
     visudo -c
 # Create and add docker group with gid
 RUN (grep docker /etc/group) || groupadd -g 999 docker && \
-    usermod -aG docker,root ${NONROOT_USER}
+    usermod -aG docker,root "${NONROOT_USER}"
 
 # Change language to ja_JP.UTF-8
 RUN localedef -i ja_JP -c -f UTF-8 -A /usr/share/locale/locale.alias ja_JP.UTF-8 && \
@@ -57,6 +57,6 @@ RUN localedef -i ja_JP -c -f UTF-8 -A /usr/share/locale/locale.alias ja_JP.UTF-8
     dpkg-reconfigure --frontend noninteractive tzdata
 ENV LANG ja_JP.UTF-8
 
-USER ${NONROOT_USER}
-WORKDIR /home/${NONROOT_USER}
+USER "${NONROOT_USER}"
+WORKDIR "/home/${NONROOT_USER}"
 ENV TERM=xterm-256color

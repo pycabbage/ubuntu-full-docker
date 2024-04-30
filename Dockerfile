@@ -47,8 +47,10 @@ RUN ( grep "${NONROOT_USER}" /etc/passwd || useradd -m -s /bin/bash -u 1000 "${N
     chmod 0440 "/etc/sudoers.d/90-${NONROOT_USER}" && \
     visudo -c
 # Create and add docker group with gid
-RUN (grep docker /etc/group) || groupadd -g 999 docker && \
-    usermod -aG docker,root "${NONROOT_USER}"
+RUN if [ "${VARIANT}" = "24.04" ]; then \
+    (grep docker /etc/group) || groupadd -g 999 docker && \
+    usermod -aG docker,root "${NONROOT_USER}"; \
+    fi
 
 # Change language to ja_JP.UTF-8
 RUN localedef -i ja_JP -c -f UTF-8 -A /usr/share/locale/locale.alias ja_JP.UTF-8 && \

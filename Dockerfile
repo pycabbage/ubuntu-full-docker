@@ -2,9 +2,10 @@
 
 ARG NONROOT_USER=ubuntu
 ARG VARIANT=24.04
+ARG PYTHON_VERSION=3.12.3
 FROM ubuntu:${VARIANT} as base
 
-FROM base as final
+FROM base as builder
 ARG NONROOT_USER
 ARG VARIANT
 ARG DEBIAN_FRONTEND=noninteractive
@@ -54,17 +55,6 @@ RUN \
         sed -i -r 's!(deb|deb-src) \S+!\1 mirror://mirrors.ubuntu.com/mirrors.txt!' /etc/apt/sources.list; \
     fi
 
-# RUN ( grep "${NONROOT_USER}" /etc/passwd || useradd -m -s /bin/bash -u 1000 "${NONROOT_USER}" ) && \
-#     usermod -aG sudo "${NONROOT_USER}" && \
-#     echo "${NONROOT_USER} ALL=NOPASSWD: ALL" > "/etc/sudoers.d/90-${NONROOT_USER}" && \
-#     chmod 0440 "/etc/sudoers.d/90-${NONROOT_USER}" && \
-#     visudo -c
-# # Create and add docker group with gid
-# RUN if [ ! "${VARIANT}" = "24.04" ]; then \
-#     (grep docker /etc/group) || groupadd -g 999 docker && \
-#     usermod -aG docker,root "${NONROOT_USER}"; \
-#     fi
-
 # Change language to ja_JP.UTF-8
 RUN localedef -i ja_JP -c -f UTF-8 -A /usr/share/locale/locale.alias ja_JP.UTF-8 && \
     update-locale LANG=ja_JP.UTF-8 && \
@@ -75,6 +65,51 @@ ENV LANG ja_JP.UTF-8
 # Build time log
 RUN echo "Build time: $(date --rfc-3339=seconds -u) UTC" > /var/log/build-time.log
 
+FROM builder as pyenv_builder
+
+ARG VARIANT
+ARG DEBIAN_FRONTEND=noninteractive
+ARG PYTHON_VERSION
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && \
+    apt-get install -y build-essential libssl-dev zlib1g-dev \
+    libbz2-dev libreadline-dev libsqlite3-dev curl \
+    libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev \
+    libffi-dev liblzma-dev ccache
+
 USER "${NONROOT_USER}"
+RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/install-python-pyenv.sh \
+    . /tmp/install-python-pyenv.sh prepare
+RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/install-python-pyenv.sh \
+    --mount=type=cache,target=/home/${NONROOT_USER}/.pyenv/sources,sharing=locked \
+    . /tmp/install-python-pyenv.sh install "${PYTHON_VERSION}"
+
+FROM builder as rust
+
+USER "${NONROOT_USER}"
+# ./scripts/install-rust.sh
+RUN --mount=type=bind,source=./scripts/install-rust.sh,target=/tmp/install-rust.sh \
+    . /tmp/install-rust.sh
+
+FROM builder as final
+
+USER "${NONROOT_USER}"
+# Copy python
+COPY --from=pyenv_builder \
+    --chown="${NONROOT_USER}":"${NONROOT_USER}" \
+    "/home/${NONROOT_USER}/.pyenv" "/home/${NONROOT_USER}/.pyenv"
+RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/install-python-pyenv.sh \
+    . /tmp/install-python-pyenv.sh bashrc
+
+# Copy rust (.cargo, .rustup)
+COPY --from=rust \
+    --chown="${NONROOT_USER}":"${NONROOT_USER}" \
+    "/home/${NONROOT_USER}/.cargo" "/home/${NONROOT_USER}/.cargo"
+COPY --from=rust \
+    --chown="${NONROOT_USER}":"${NONROOT_USER}" \
+    "/home/${NONROOT_USER}/.rustup" "/home/${NONROOT_USER}/.rustup"
+
 WORKDIR "/home/${NONROOT_USER}"
 ENV TERM=xterm-256color

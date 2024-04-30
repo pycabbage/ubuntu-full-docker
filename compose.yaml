@@ -5,6 +5,10 @@ services:
     build:
       context: .
       target: final
+      args:
+        - VARIANT=24.04
+        - NONROOT_USER=ubuntu
+        - PYTHON_VERSION=3.12.3
     cap_add:
       - SYS_ADMIN
     security_opt:

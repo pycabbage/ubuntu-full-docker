@@ -1,13 +1,23 @@
 # syntax=docker/dockerfile:1
 
 ARG NONROOT_USER=ubuntu
-ARG VARIANT=22.04
+ARG VARIANT=24.04
 FROM ubuntu:${VARIANT} as base
 
 FROM base as final
 ARG NONROOT_USER
 ARG VARIANT
 ARG DEBIAN_FRONTEND=noninteractive
+
+# Add non-root user before unminimize to avoid uid/gid conflict
+RUN ( grep "${NONROOT_USER}" /etc/passwd || useradd -m -s /bin/bash -u 1000 "${NONROOT_USER}" ) && \
+    usermod -aG sudo "${NONROOT_USER}" && \
+    echo "${NONROOT_USER} ALL=NOPASSWD: ALL" > "/etc/sudoers.d/90-${NONROOT_USER}" && \
+    chmod 0440 "/etc/sudoers.d/90-${NONROOT_USER}" && \
+    visudo -c
+# Create and add docker group with gid
+RUN (grep -E "999|docker" /etc/group) || groupadd -g 999 docker && \
+    usermod -aG docker,root "${NONROOT_USER}"
 
 RUN sed -i -E 's/(apt-get upgrade)$/DEBIAN_FRONTEND=noninteractive \1 -y/g' $(which unminimize) && \
     sed -i -E 's/^(read)/REPLY=Y # \1/g' $(which unminimize)
@@ -41,16 +51,16 @@ RUN \
         sed -i -r 's!(deb|deb-src) \S+!\1 mirror://mirrors.ubuntu.com/mirrors.txt!' /etc/apt/sources.list; \
     fi
 
-RUN ( grep "${NONROOT_USER}" /etc/passwd || useradd -m -s /bin/bash -u 1000 "${NONROOT_USER}" ) && \
-    usermod -aG sudo "${NONROOT_USER}" && \
-    echo "${NONROOT_USER} ALL=NOPASSWD: ALL" > "/etc/sudoers.d/90-${NONROOT_USER}" && \
-    chmod 0440 "/etc/sudoers.d/90-${NONROOT_USER}" && \
-    visudo -c
-# Create and add docker group with gid
-RUN if [ ! "${VARIANT}" = "24.04" ]; then \
-    (grep docker /etc/group) || groupadd -g 999 docker && \
-    usermod -aG docker,root "${NONROOT_USER}"; \
-    fi
+# RUN ( grep "${NONROOT_USER}" /etc/passwd || useradd -m -s /bin/bash -u 1000 "${NONROOT_USER}" ) && \
+#     usermod -aG sudo "${NONROOT_USER}" && \
+#     echo "${NONROOT_USER} ALL=NOPASSWD: ALL" > "/etc/sudoers.d/90-${NONROOT_USER}" && \
+#     chmod 0440 "/etc/sudoers.d/90-${NONROOT_USER}" && \
+#     visudo -c
+# # Create and add docker group with gid
+# RUN if [ ! "${VARIANT}" = "24.04" ]; then \
+#     (grep docker /etc/group) || groupadd -g 999 docker && \
+#     usermod -aG docker,root "${NONROOT_USER}"; \
+#     fi
 
 # Change language to ja_JP.UTF-8
 RUN localedef -i ja_JP -c -f UTF-8 -A /usr/share/locale/locale.alias ja_JP.UTF-8 && \

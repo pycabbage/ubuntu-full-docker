@@ -4,7 +4,11 @@
 TASK=${1:-"prepare"}
 PYTHON_VERSION=${2:-3.12.3}
 
+echo PATH: $PATH
+
 if [ -d $PYENV_ROOT/bin ]; then
+  echo "pyenv is already installed"
+  source ~/.bashrc
   PYENV_ROOT="$HOME/.pyenv"
   [[ -d $PYENV_ROOT/bin ]] && PATH="$PYENV_ROOT/bin:$PATH"
   eval "$(pyenv init -)"

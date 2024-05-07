@@ -61,7 +61,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     libffi-dev liblzma-dev ccache
 
 USER "${NONROOT_USER}"
-# scripts/install-python-pyenv.sh
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/install-python-pyenv.sh \
     . /tmp/install-python-pyenv.sh prepare
 RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/install-python-pyenv.sh \
@@ -71,7 +71,7 @@ RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/insta
 FROM builder as rust
 
 USER "${NONROOT_USER}"
-# ./scripts/install-rust.sh
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN --mount=type=bind,source=./scripts/install-rust.sh,target=/tmp/install-rust.sh \
     . /tmp/install-rust.sh
 

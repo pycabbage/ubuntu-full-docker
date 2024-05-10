@@ -112,8 +112,12 @@ jobs:
           outputs: ${{ github.event_name == 'pull_request' && 'type=local,dest=ubuntu-${{ matrix.variant }}.tgz' || 'type=registry' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: |
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:cache-${{ matrix.variant }}
+            type=gha
+          cache-to: |
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:cache-${{ matrix.variant }},mode=max
+            type=gha,mode=max
           build-args: |
             VARIANT=${{ matrix.variant }}
 

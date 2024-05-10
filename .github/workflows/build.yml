@@ -43,8 +43,8 @@ jobs:
     strategy:
       matrix:
         variant:
-        - 22.04
-        - 24.04
+        - "22.04"
+        - "24.04"
       fail-fast: false
 
     steps:
@@ -107,6 +107,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          pull: true
           push: ${{ github.event_name != 'pull_request' }}
           outputs: ${{ github.event_name == 'pull_request' && 'type=local,dest=ubuntu-${{ matrix.variant }}.tgz' || 'type=registry' }}
           tags: ${{ steps.meta.outputs.tags }}

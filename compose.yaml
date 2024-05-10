@@ -14,11 +14,11 @@ services:
       - SYS_ADMIN
     security_opt:
       - seccomp:unconfined
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities: [gpu]
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - capabilities: [gpu]
     command: ["bash", "-c", "while :; do sleep 3600; done"]
     volumes:
       - &ubuntu_volume_apt_cache apt-cache:/var/cache/apt

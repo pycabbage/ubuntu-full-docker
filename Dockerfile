@@ -81,7 +81,7 @@ FROM builder as rust
 USER "${NONROOT_USER}"
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN --mount=type=bind,source=./scripts/install-rust.sh,target=/tmp/install-rust.sh \
-    . /tmp/install-rust.sh
+    . /tmp/install-rust.sh install
 
 FROM builder as nodejs
 ARG NODEJS_VERSION
@@ -117,6 +117,8 @@ COPY --from=rust \
 COPY --from=rust \
     --chown="${NONROOT_USER}":"${NONROOT_USER}" \
     "/home/${NONROOT_USER}/.rustup" "/home/${NONROOT_USER}/.rustup"
+RUN --mount=type=bind,source=./scripts/install-rust.sh,target=/tmp/install-rust.sh \
+    . /tmp/install-rust.sh bashrc
 
 USER root
 

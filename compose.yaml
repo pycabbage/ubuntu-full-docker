@@ -45,7 +45,7 @@ services:
       - *ubuntu_volume_docker_sock
       - *ubuntu_volume_docker_cache
       - ./scripts/:/tmp/scripts/
-    command: &test_command ["bash", "/tmp/scripts/test.sh"]
+    command: &test_command ["/bin/bash", "--login", "-i", "-c", ". /tmp/scripts/test.sh"]
 
   test2404:
     <<: *ubuntu2404

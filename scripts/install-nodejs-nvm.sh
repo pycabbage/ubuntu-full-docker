@@ -14,6 +14,10 @@ if [ $TASK = "install" ]; then
   export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
   [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
+  # install nodejs
+  nvm install $NODEJS_VERSION
+  nvm use $NODEJS_VERSION
+
 elif [ $TASK = "bashrc" ]; then
   echo "write script to .bashrc"
   echo export NVM_DIR=\"\$\([ -z \"\${XDG_CONFIG_HOME-}\" ] \&\& printf %s \"\${HOME}/.nvm\" \|\| printf %s \"\${XDG_CONFIG_HOME}/nvm\"\)\" >> $HOME/.bashrc

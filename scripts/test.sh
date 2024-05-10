@@ -1,4 +1,19 @@
-#!/bin/bash -e
+#!/bin/bash --login --init-file ~/.bashrc
+
+echo \$\-: \"$-\"
+
+source $HOME/.bashrc
+
+# initialize
+# . "$HOME/.cargo/env"
+
+# PYENV_ROOT="$HOME/.pyenv"
+# PATH="$PYENV_ROOT/bin:$PATH"
+# eval "$(pyenv init -)"
+# eval "$(pyenv virtualenv-init -)"
+
+# export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+# [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
 NONROOT_USER=${NONROOT_USER:-"ubuntu"}
 
@@ -21,7 +36,7 @@ else
 fi
 
 # test docker outside of docker
-docker run -it --rm hello-world
+docker version
 
 # test if `rustup`,`cargo`,`rustc` can be found in PATH
 echo rustup: $(which rustup)
@@ -29,6 +44,10 @@ echo cargo:  $(which cargo)
 echo rustc:  $(which rustc)
 
 # test if `pyenv` and `python` is in PATH
-echo pyenv: $(which pyenv)
-echo python:  $(which python)
-echo Python version: $(python -V)
+echo pyenv:  $(which pyenv)
+echo python: $(which python)
+echo "Python version: $(python -V)"
+
+# test nvm and node
+echo "nvm: $(nvm --version)"
+echo "node: $(node -v)"

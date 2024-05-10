@@ -118,6 +118,8 @@ COPY --from=rust \
     --chown="${NONROOT_USER}":"${NONROOT_USER}" \
     "/home/${NONROOT_USER}/.rustup" "/home/${NONROOT_USER}/.rustup"
 
+USER root
+
 # revert apt cache settings
 RUN mv /tmp/docker-clean /etc/apt/apt.conf.d/docker-clean && \
     rm /etc/apt/apt.conf.d/keep-cache
@@ -135,6 +137,8 @@ RUN localedef -i ja_JP -c -f UTF-8 -A /usr/share/locale/locale.alias ja_JP.UTF-8
     dpkg-reconfigure --frontend noninteractive tzdata
 # Build time log
 RUN echo "Build time: $(date --rfc-3339=seconds -u) UTC" > /var/log/build-time.log
+
+USER "${NONROOT_USER}"
 ENV LANG ja_JP.UTF-8
 WORKDIR "/home/${NONROOT_USER}"
 ENV TERM=xterm-256color

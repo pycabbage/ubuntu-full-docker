@@ -33,7 +33,7 @@ EOF
 
   # Install pyenv-ccache
   git clone https://github.com/pyenv/pyenv-ccache.git $($PYENV root)/plugins/pyenv-ccache
-else if [ $TASK = "bashrc" ]; then
+elif [ $TASK = "bashrc" ]; then
 cat <<EOF >> ~/.bashrc
 export PYENV_ROOT="\$HOME/.pyenv"
 [[ -d \$PYENV_ROOT/bin ]] && export PATH="\$PYENV_ROOT/bin:\$PATH"
@@ -41,7 +41,7 @@ eval "\$(pyenv init -)"
 eval "\$(pyenv virtualenv-init -)"
 EOF
   source ~/.bashrc
-else if [ $TASK = "install" ]; then
+elif [ $TASK = "install" ]; then
   PYENV_ROOT="$HOME/.pyenv"
   PYENV="$PYENV_ROOT/bin/pyenv"
   # Build python

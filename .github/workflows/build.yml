@@ -100,7 +100,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          outputs: ${{ github.event_name == 'pull_request' && 'type=local,dest=image.tgz' || 'type=registry' }}
+          outputs: ${{ github.event_name == 'pull_request' && 'type=local,dest=ubuntu-${{ matrix.variant }}.tgz' || 'type=registry' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -112,8 +112,8 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: ubuntu-${{ matrix.variant }}-image
-          path: image.tgz
+          name: ubuntu-${{ matrix.variant }}.tgz
+          path: ubuntu-${{ matrix.variant }}.tgz
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
@@ -129,3 +129,34 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        variant:
+        - 22.04
+        - 24.04
+      fail-fast: false
+    needs: [build]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/download-artifact@v4
+        with:
+          name: ubuntu-${{ matrix.variant }}.tgz
+      - name: Import container
+        if: github.event_name == 'pull_request'
+        run: docker load -i ubuntu-${{ matrix.variant }}.tgz
+      - name: Test container
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: docker compose up "test${VARIANT//./}"

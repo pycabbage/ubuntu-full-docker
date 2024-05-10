@@ -5,10 +5,12 @@
 
 ## Feature
 
-- nonroot user: `ubuntu` (included in nopasswd `sudo` group)
-- Installed package: inatalled in Ubuntu Server
-- Language: `ja_JP.UTF-8`
-- Docker outside of Docker
+- [x] nonroot user: `ubuntu` (included in nopasswd `sudo` group)
+- [x] Installed package: inatalled in Ubuntu Server
+- [x] Language: `ja_JP.UTF-8`
+- [x] Docker outside of Docker
+- [x] Rust via rustup
+- [ ] Python with pyenv
 
 ## Usage
 

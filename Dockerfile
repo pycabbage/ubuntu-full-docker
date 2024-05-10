@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1
 
 ARG NONROOT_USER=ubuntu
+ARG NONROOT_USER_UID=1000
+ARG NONROOT_USER_GID=1000
 ARG VARIANT=24.04
 ARG PYTHON_VERSION=3.12.3
 
@@ -8,6 +10,8 @@ FROM ubuntu:${VARIANT} as base
 
 FROM base as builder
 ARG NONROOT_USER
+ARG NONROOT_USER_UID
+ARG NONROOT_USER_GID
 ARG VARIANT
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -18,7 +22,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt update && \
     apt-get install -y sudo adduser
-RUN ( grep "${NONROOT_USER}" /etc/passwd || useradd -m -s /bin/bash -u 1000 "${NONROOT_USER}" ) && \
+RUN ( grep "${NONROOT_USER}" /etc/passwd || useradd -m -s /bin/bash -u ${NONROOT_USER_UID} "${NONROOT_USER}" ) && \
     usermod -aG docker,root,sudo "${NONROOT_USER}" && \
     echo "${NONROOT_USER} ALL=NOPASSWD: ALL" > "/etc/sudoers.d/90-${NONROOT_USER}" && \
     chmod 0440 "/etc/sudoers.d/90-${NONROOT_USER}" && \
@@ -49,6 +53,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 FROM builder as pyenv_builder
 
 ARG VARIANT
+ARG NONROOT_USER_UID
+ARG NONROOT_USER_GID
 ARG DEBIAN_FRONTEND=noninteractive
 ARG PYTHON_VERSION
 
@@ -65,7 +71,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/install-python-pyenv.sh \
     . /tmp/install-python-pyenv.sh prepare
 RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/install-python-pyenv.sh \
-    --mount=type=cache,target=/home/${NONROOT_USER}/.pyenv/sources,sharing=locked \
+    --mount=type=cache,target=/home/${NONROOT_USER}/.pyenv/sources,uid=${NONROOT_USER_UID},gid=${NONROOT_USER_GID} \
     . /tmp/install-python-pyenv.sh install "${PYTHON_VERSION}"
 
 FROM builder as rust

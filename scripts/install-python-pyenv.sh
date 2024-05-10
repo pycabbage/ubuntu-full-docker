@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # "prepare" or "install" or "bashrc"
-TASK=${1:-"prepare"}
+TASK=${1:-"empty"}
 PYTHON_VERSION=${2:-3.12.3}
 
 if [ -d $HOME/.pyenv/bin ]; then
@@ -34,7 +34,7 @@ EOF
   # Install pyenv-ccache
   git clone https://github.com/pyenv/pyenv-ccache.git $($PYENV root)/plugins/pyenv-ccache
 elif [ $TASK = "bashrc" ]; then
-cat <<EOF >> ~/.bashrc
+  cat <<EOF >> ~/.bashrc
 export PYENV_ROOT="\$HOME/.pyenv"
 [[ -d \$PYENV_ROOT/bin ]] && export PATH="\$PYENV_ROOT/bin:\$PATH"
 eval "\$(pyenv init -)"

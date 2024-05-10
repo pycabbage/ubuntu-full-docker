@@ -5,6 +5,7 @@ ARG NONROOT_USER_UID=1000
 ARG NONROOT_USER_GID=1000
 ARG VARIANT=24.04
 ARG PYTHON_VERSION=3.12.3
+ARG NODEJS_VERSION=v22.1.0
 
 FROM ubuntu:${VARIANT} as base
 
@@ -71,7 +72,10 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/install-python-pyenv.sh \
     . /tmp/install-python-pyenv.sh prepare
 RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/install-python-pyenv.sh \
-    --mount=type=cache,target=/home/${NONROOT_USER}/.pyenv/sources,uid=${NONROOT_USER_UID},gid=${NONROOT_USER_GID} \
+    --mount=type=cache,target=/home/${NONROOT_USER}/.pyenv/sources,\
+        uid=${NONROOT_USER_UID},gid=${NONROOT_USER_GID},sharing=locked \
+    --mount=type=cache,target=/home/${NONROOT_USER}/.pyenv/ccache,\
+        uid=${NONROOT_USER_UID},gid=${NONROOT_USER_GID},sharing=locked \
     . /tmp/install-python-pyenv.sh install "${PYTHON_VERSION}"
 
 FROM builder as rust
@@ -81,15 +85,32 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN --mount=type=bind,source=./scripts/install-rust.sh,target=/tmp/install-rust.sh \
     . /tmp/install-rust.sh
 
+FROM builder as nodejs
+ARG NODEJS_VERSION
+
+USER "${NONROOT_USER}"
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN --mount=type=bind,source=./scripts/install-nodejs-nvm.sh,target=/tmp/install-nodejs-nvm.sh \
+    . /tmp/install-nodejs-nvm.sh install "${NODEJS_VERSION}"
+
 FROM builder as final
 
 USER "${NONROOT_USER}"
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # Copy python
 COPY --from=pyenv_builder \
     --chown="${NONROOT_USER}":"${NONROOT_USER}" \
     "/home/${NONROOT_USER}/.pyenv" "/home/${NONROOT_USER}/.pyenv"
 RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/install-python-pyenv.sh \
     . /tmp/install-python-pyenv.sh bashrc
+
+# Copy nodejs
+COPY --from=nodejs \
+    --chown="${NONROOT_USER}":"${NONROOT_USER}" \
+    "/home/${NONROOT_USER}/.nvm" "/home/${NONROOT_USER}/.nvm"
+RUN --mount=type=bind,source=./scripts/install-nodejs-nvm.sh,target=/tmp/install-nodejs-nvm.sh \
+    . /tmp/install-nodejs-nvm.sh bashrc
 
 # Copy rust (.cargo, .rustup)
 COPY --from=rust \
@@ -104,7 +125,7 @@ RUN mv /tmp/docker-clean /etc/apt/apt.conf.d/docker-clean && \
     rm /etc/apt/apt.conf.d/keep-cache
 # Change apt mirror
 RUN \
-    if [ "${VARIANT}" = "24.04" ]; then \
+    if [ "${VARIANT%.*}" -ge 24 ]; then \
     sed -i -r 's!(URIs:) \S+!\1 mirror://mirrors.ubuntu.com/mirrors.txt!' /etc/apt/sources.list.d/ubuntu.sources; \
     else \
     sed -i -r 's!(deb|deb-src) \S+!\1 mirror://mirrors.ubuntu.com/mirrors.txt!' /etc/apt/sources.list; \

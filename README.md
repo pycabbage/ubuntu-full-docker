@@ -10,7 +10,8 @@
 - [x] Language: `ja_JP.UTF-8`
 - [x] Docker outside of Docker
 - [x] Rust via rustup
-- [ ] Python with pyenv
+- [ ] Python via pyenv
+- [ ] Node.js via nvm
 
 ## Usage
 

@@ -51,6 +51,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      # - name: Get repo status
+      #   id: repo
+      #   run: |
+      #     echo visibility=$(gh api \
+      #       -H "Accept: application/vnd.github+json" \
+      #       -H "X-GitHub-Api-Version: 2022-11-28" \
+      #       /repos/pycabbage/ubuntu-full-docker | \
+      #       jq '.visibility') > $GITHUB_OUTPUT
 
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
@@ -132,6 +140,7 @@ jobs:
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
       - name: Attest
         uses: actions/attest-build-provenance@v1
+        # if: ${{ steps.repo.visibility == 'public' }}
         id: attest
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}

@@ -72,10 +72,8 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/install-python-pyenv.sh \
     . /tmp/install-python-pyenv.sh prepare
 RUN --mount=type=bind,source=./scripts/install-python-pyenv.sh,target=/tmp/install-python-pyenv.sh \
-    --mount=type=cache,target=/home/${NONROOT_USER}/.pyenv/sources,\
-        uid=${NONROOT_USER_UID},gid=${NONROOT_USER_GID},sharing=locked \
-    --mount=type=cache,target=/home/${NONROOT_USER}/.pyenv/ccache,\
-        uid=${NONROOT_USER_UID},gid=${NONROOT_USER_GID},sharing=locked \
+    --mount=type=cache,target=/home/${NONROOT_USER}/.pyenv/sources,uid=${NONROOT_USER_UID},gid=${NONROOT_USER_GID},sharing=locked \
+    --mount=type=cache,target=/home/${NONROOT_USER}/.pyenv/ccache,uid=${NONROOT_USER_UID},gid=${NONROOT_USER_GID},sharing=locked \
     . /tmp/install-python-pyenv.sh install "${PYTHON_VERSION}"
 
 FROM builder as rust

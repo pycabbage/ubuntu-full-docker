@@ -1,8 +1,8 @@
 services:
-  ubuntu_2204: &ubuntu_2204
+  ubuntu2204: &ubuntu2204
     image: ghcr.io/pycabbage/ubuntu-full-docker:22.04
     pull_policy: always
-    build: &ubuntu_2204_build
+    build: &ubuntu2204_build
       context: .
       target: final
       args:
@@ -27,18 +27,18 @@ services:
       - &ubuntu_volume_docker_cache docker-cache:/var/lib/docker
     group_add:
       - docker
-  ubuntu_2404: &ubuntu_2404
-    <<: *ubuntu_2204
+  ubuntu2404: &ubuntu2404
+    <<: *ubuntu2204
     image: ghcr.io/pycabbage/ubuntu-full-docker:24.04
     build:
-      <<: *ubuntu_2204_build
+      <<: *ubuntu2204_build
       args:
         - VARIANT=24.04
         - *ubuntu_args_nonroot_user
         - *ubuntu_args_python_version
         - *ubuntu_args_nodejs_version
-  test_2204:
-    <<: *ubuntu_2204
+  test2204:
+    <<: *ubuntu2204
     volumes: &test_volumes
       - *ubuntu_volume_apt_cache
       - *ubuntu_volume_apt_store
@@ -47,8 +47,8 @@ services:
       - ./scripts/:/tmp/scripts/
     command: &test_command ["bash", "/tmp/scripts/test.sh"]
 
-  test_2404:
-    <<: *ubuntu_2404
+  test2404:
+    <<: *ubuntu2404
     volumes: *test_volumes
     command: *test_command
 

@@ -17,5 +17,6 @@
 
 ```bash
 docker compose up -d
-docker compose exec ubuntu /bin/bash
+docker compose exec ubuntu2404 /bin/bash
+# or ubuntu2204
 ```
